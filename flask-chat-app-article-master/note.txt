@@ -1,0 +1,12 @@
+state 0 = chào hỏi 
+state 1 = hỏi, lấy 3 câu
+state 2 = tree 
+
+Supervised Learning / Unsupervised Learning : 
+Explore overfitting and underfitting: https://www.tensorflow.org/tutorials/keras/overfit_and_underfit
+
+In the early days of research, researchers focus on identifying sentiment mainly on news text [6], [7], [8], [9]. In recent years, there have been many the well-known shared tasks about opinion mining on Twitter, for examples, the SemEval-2013 Task 2 [10], and SemEval-2014 Task 9 (Rosenthal et al., 2014) did experiments on two sub-tasks consisting of a expression-level and a message-level polarity; and the SemEval-2015 Task 10 [11] added subtasks on topic-based message polarity classification. The SemEval-2016 Task 4 [12] dropped the phrase-level subtask and the strength of association subtask, and focused on sentiment with respect to a topic. In addition, there were several related work on opinion mining in e-learning data [2], [3], [4], [5]. Vietnamese is a language which has few resources for research on natural language processing. There are merely a few of research works on opinion mining, for examples, computer customers’ reviews (laptops and desktops) [14], hotel reviews [15], electronic devices [16]. As can be seen that these works are primarily focused on e-commerce products, additionally there have been only few sentiment experiments related to education domain as students’ feedback data [12]. Students’ feedback can help the lecturers and the education managers understand learners’ behaviors as well as learning and teaching activities which learners desire.
+
+Sequential() = default mode
+
+

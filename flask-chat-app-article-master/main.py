@@ -138,10 +138,12 @@ guive = {}
 rulekeywords = {}
 import xlrd
 book = xlrd.open_workbook('/Users/mac/Desktop/FQA.xlsx')
-sheet = book.sheet_by_name('P.QHĐN')
-data = [sheet.cell_value(r, c) for c in range(2) for r in range(1,sheet.nrows)]
-answer = [sheet.cell_value(r, 1) for r in range(1,sheet.nrows)]
-
+dhqt = book.sheet_by_name('P.QHĐN')
+ctlk = book.sheet_by_name('CTLK')
+data = [dhqt.cell_value(r, c) for c in range(2) for r in range(1,dhqt.nrows)]
+answer = [dhqt.cell_value(r, 1) for r in range(1,dhqt.nrows)]
+data2 = [ctlk.cell_value(r, c) for c in range(2) for r in range(1,ctlk.nrows)]
+answer2 = [ctlk.cell_value(r, 1) for r in range(1,ctlk.nrows)]
 #filename = os.path.join(app.static_folder, 'data', 'keywords.json')
 filename = '/Users/mac/Desktop/PythonSocket/flask-chat-app-article-master/static/data/keywords.json'
 with open(filename) as test_file:
@@ -149,7 +151,7 @@ with open(filename) as test_file:
 print (keywords)
 
 keyDHQT = ["học phí", "tuyển sinh", "ngôn ngữ", "trình độ"]
-keyDongy =['yup', 'đúng', 'đúng rồi','yes','ok', 'okay']
+keyDongy =['yup', 'đúng', 'đúng rồi','yes','ok', 'okay', 'ừ']
 keyKodongy = ['ko', 'không', 'không đúng', 'no', 'không phải', 'nope']
 
 #     def is_anonymous(self):
@@ -169,6 +171,21 @@ class Messages(db.Model):
 	message = db.Column('message', db.String(500))
 	name = db.Column('user_name', db.String(500))
 
+class Positive(db.Model):
+	__tablename__ = 'Positive'
+	id = db.Column('id', db.Integer, primary_key=True)
+	comment = db.Column('comment', db.String(500))
+
+class Negative(db.Model):
+	__tablename__ = 'Negative'
+	id = db.Column('id', db.Integer, primary_key=True)
+	comment = db.Column('comment', db.String(500))
+
+class UnanswerQuestion(db.Model):
+	__tablename__ = 'UnanswerQuestion'
+	id = db.Column('id', db.Integer, primary_key=True)
+	sheet = db.Column('sheet', db.String(500))
+	question = db.Column('question', db.String(500))
 # class User(db.Model):
 # 	__tablename__ = 'User'
 # 	id = db.Column('id', db.Integer, primary_key=True)
@@ -190,13 +207,12 @@ class RegisterForm(FlaskForm):
     username = StringField('user_name', validators=[InputRequired(), Length(min=4, max=15)])
     password = PasswordField('password', validators=[InputRequired(), Length(min=8, max=80)])
 
+
 def preintend(mess, username): 
 	intend = ['hi', 'hello', 'xin chao']
 	needle = mess
 	maxi = 0 
 	result = 'ask'
-	# maxi1 = 0
-	# maxi2 = 0
 	for hay in intend:
 	    ratio = fuzz.token_set_ratio(needle, hay)
 	    print('%.5f' % ratio + " " + hay)
@@ -205,152 +221,357 @@ def preintend(mess, username):
 	    	result = 'gthieu'
 	    elif result == 'ask':
 	    	result = predictquescmt(mess)
-	return result 
+	return result
 
-def predict(mess, username):
+
+def predictdhqt(json, maxi,maxi1,maxi2):
 	count = 0 
-	needle = mess
-	maxi = 0 
-	# maxi1 = 0
-	# maxi2 = 0
+	needle = json['message']
+	maxi = maxi  
+	maxi1 = maxi1
+	maxi2 = maxi2
 	for hay in data:
 	    ratio = fuzz.token_set_ratio(needle, hay)
 	    print('%.5f' % ratio + " " + hay)
 	    if ratio >= maxi:
 	    	if count < 3:
-	    		guive[username]['cau'+ str(count)] = data.index(hay)
-	    		maxi = ratio
-	    		result = data.index(hay) 
+	    		guive[json['user_name']]['cau'+ str(count)] = {'from': 'dhqt', 'index': data.index(hay)}
 	    		count += 1
 	    	else:
-	    		guive[username]['cau0'] = guive[username]['cau1'] 
-	    		guive[username]['cau1'] = guive[username]['cau2']
-	    		guive[username]['cau2'] = data.index(hay)
-	    		result = data.index(hay) 
+	    		guive[json['user_name']]['cau0'] = guive[json['user_name']]['cau1'] 
+	    		guive[json['user_name']]['cau1'] = guive[json['user_name']]['cau2']
+	    		guive[json['user_name']]['cau2'] = {'from': 'dhqt', 'index': data.index(hay)}
+	    	maxi = ratio
+	    elif (ratio >= maxi1 and ratio < maxi):
+	    	if count == 1:
+	    		guive[json['user_name']]['cau1'] = guive[json['user_name']]['cau0'] 
+	    		guive[json['user_name']]['cau0'] = {'from': 'dhqt', 'index': data.index(hay)}
+	    		#result = data.index(hay) 
+	    		count += 1
+	    	else:
+	    		guive[json['user_name']]['cau0'] = guive[json['user_name']]['cau1'] 
+	    		guive[json['user_name']]['cau1'] = {'from': 'dhqt', 'index': data.index(hay)}
+	    		#result = data.index(hay)
+	    	maxi1 = ratio
 
-	    # elif ratio > maxi1:
-	    # 	if count == 1:
-	    # 		guive[username]['cau'+ str(count)] = data.index(hay)
-	    # 		maxi1 = ratio
-	    # 		#result = data.index(hay) 
-	    # 		count += 1
-	    # 	else:
-	    # 		guive[username]['cau0'] = guive[username]['cau1'] 
-	    # 		guive[username]['cau1'] = data.index(hay)
-	    # 		#result = data.index(hay)
+	    elif (ratio >= maxi2 and ratio < maxi1) :
+	    	if count == 2:
+	    		guive[json['user_name']]['cau2'] = guive[json['user_name']]['cau1']
+	    		guive[json['user_name']]['cau1'] = guive[json['user_name']]['cau0']  
+	    		guive[json['user_name']]['cau0'] = {'from': 'dhqt', 'index': data.index(hay)}
+	    		maxi2 = ratio
+	    		#result = data.index(hay) 
+	    		count += 1
+	    	else:
+	    		guive[json['user_name']]['cau0'] = {'from': 'dhqt', 'index': data.index(hay)}
+	    	maxi2 = ratio
+	    		#result = data.index(hay) 
+	    #print(guive[json['user_name']]['cau2'])
+	return maxi,maxi1,maxi2
 
-	    # elif ratio > maxi2:
-	    # 	if count == 2:
-	    # 		guive[username]['cau'+ str(count)] = data.index(hay)
-	    # 		maxi2 = ratio
-	    # 		#result = data.index(hay) 
-	    # 		count += 1
-	    # 	else:
-	    # 		guive[username]['cau0'] = data.index(hay)
-	    # 		#result = data.index(hay) 
+def predictCtlk(json, maxi,maxi1,maxi2):
+	needle = json['message']
+	maxi = maxi  
+	maxi1 = maxi1
+	maxi2 = maxi2
+	for hay in data2:
+	    ratio = fuzz.token_set_ratio(needle, hay)
+	    print('%.5f' % ratio + " " + hay)
+	    if ratio >= maxi:
+    		guive[json['user_name']]['cau0'] = guive[json['user_name']]['cau1'] 
+    		guive[json['user_name']]['cau1'] = guive[json['user_name']]['cau2']
+    		guive[json['user_name']]['cau2'] = {'from': 'ctlk', 'index': data2.index(hay)}
+    		result = data2.index(hay) 
+    		maxi = ratio
+
+	    elif (ratio >= maxi1 and ratio < maxi):
+    		guive[json['user_name']]['cau0'] = guive[json['user_name']]['cau1'] 
+    		guive[json['user_name']]['cau1'] = {'from': 'ctlk', 'index': data2.index(hay)}
+    		maxi1 = ratio
+	    		#result = data.index(hay)
+
+	    elif (ratio >= maxi2 and ratio < maxi1) :
+    		guive[json['user_name']]['cau0'] = {'from': 'ctlk', 'index': data2.index(hay)}
+    		maxi2 = ratio
+    		#result = data.index(hay) 
+		    		
 
 
-	print(result)
-	print(guive[username]['cau' + str(count-1)])
-	index = guive[username]['cau' + str(count-1)]
+def predict(json):
+	maxi = 0 
+	maxi1 = 0
+	maxi2 = 0
+	if guive[json['user_name']]['state'] == 2:
+		if rulekeywords[json['user_name']]['sheet'] == "đhqt":
+			print ("tu cho predict state 2")
+			predictdhqt(json, maxi,maxi1,maxi2)
+		elif rulekeywords[json['user_name']]['sheet'] == "ctlk":
+			predictCtlk(json, maxi,maxi1,maxi2)
+		guive[json['user_name']]['state'] = 3
+
+
+	else:
+		maxi,maxi1,maxi2 = predictdhqt(json, maxi,maxi1,maxi2)
+		predictCtlk(json, maxi,maxi1,maxi2)
+
+		
+	print(guive[json['user_name']]['cau2']) 
+	nguon = guive[json['user_name']]['cau2']['from']
+	print ("tu cho in predict: "+ nguon)
+	index = guive[json['user_name']]['cau2']['index']
 	#print (index)
-	if index > 3:
-		index = index - 4 
+	if nguon == 'dhqt':
+		if index >= dhqt.nrows-1:
+			index = index - dhqt.nrows + 1 
+		return data[index]
+	elif nguon == 'ctlk':
+		if index >= ctlk.nrows-1:
+			index = index - ctlk.nrows + 1 
+		return data2[index]		
 	#sessionu = {username : data[index]}
-	return data[index]
-
-def initrulebase(json):
-	rulekeywords[json['user_name']] = {'state': 0, 'keyarray': []}
-	oriques = word_tokenize(guive[json['user_name']]['oriques'])
-	print (oriques)
-	pre = 'Có vẻ như mình không đoán được câu hỏi rồi, bạn vui lòng trả lời mình vài câu để đoán đúng hơn nha :)\n Bạn muốn hỏi về ĐHQT hay là ISEaSAP (chương trình trao đổi)?'
-	serpre = Messages(message=pre,name="server" + json['user_name'])
-	#oriques = word_tokenize('fuck you bith')
-	for word in oriques:
-		if word in keywords:
-			rulekeywords[json['user_name']]['keyarray'].append(word)
-			if word == 'ĐHQT':
-				rulekeywords[json['user_name']]['state'] = 0.1
-				pre, serpre = handletree(json)
-			elif word == 'ISEaSAP':
-				rulekeywords[json['user_name']]['state'] = 1.2
-				pre, serpre = handletree(json)
-			break
-
-	return pre, serpre 
-
-def handletree(json):
-	if rulekeywords[json['user_name']]['state'] == 0:
-		rulekeywords[json['user_name']]['keyarray'].append(json['message'])
-		if json['message'] == 'DHQT':
-			rulekeywords[json['user_name']]['state'] = 0.1
-		else:
-			rulekeywords[json['user_name']]['state'] = 1.2
-
-	if rulekeywords[json['user_name']]['state'] == 0.1:
-		rulekeywords[json['user_name']]['state'] = 1.1
-		pre = 'Bạn muốn biết mục nào của ĐHQT?\n-học phí\n-Tuyển sinh\n-Ngôn ngữ'
-		serpre = Messages(message=pre,name="server" + json['user_name'])
-
-	elif rulekeywords[json['user_name']]['state'] == 1.1:
-		rulekeywords[json['user_name']]['keyarray'].append(json['message'])
-		rulekeywords[json['user_name']]['state'] = 2.1
-		if json['message'] == 'Ngôn ngữ':
-			pre = 'Mình có thể trả lời những chủ đề sau đây, bạn chọn ?\n-Ngôn ngữ giảng dạy\n-Trình độ để học'
-			serpre = Messages(message=pre,name="server" + json['user_name'])
-		else:
-			mess = ''
-			for i in rulekeywords[json['user_name']]['keyarray']:
-				mess = mess + i
-			ujson = {'user_name': json['user_name'], 'message': mess}
-			pre, serpre = get3answer(ujson)
-
-	elif rulekeywords[json['user_name']]['state'] == 1.2:
-		ulekeywords[json['user_name']]['keyarray'].append(json['message'])
-		rulekeywords[json['user_name']]['state'] = 2.2
-
-
-	return pre, serpre
-
-
-def get3answer(json):
-	guive[json['user_name']] = {'cautrl' : 2, 'state' : 1, 'oriques':json['message'] } # setting session data
-	pre = 'Có phải bạn muốn hỏi: ' + predict(str(json['message']), json['user_name'])
-	serpre = Messages(message=pre,name="server" + json['user_name'])
-	return pre, serpre 
 
 
 def handle3cauhoi(json):
 	for word in word_tokenize(json['message']):
 		if word in keyKodongy:
 		#if json['message'] == 'ko':
-			if guive[json['user_name']]['cautrl'] != 0:
-				#guive[json['user_name']] = guive[json['user_name']]
+			if guive[json['user_name']]['cautrl'] != -1 :
+
+				nguon = guive[json['user_name']]['cau' + str(guive[json['user_name']]['cautrl'])]['from']
+				print (nguon)
+				index = guive[json['user_name']]['cau' + str(guive[json['user_name']]['cautrl'])]['index']
 				guive[json['user_name']]['cautrl'] = guive[json['user_name']]['cautrl'] - 1
-				index = guive[json['user_name']]['cau' + str(guive[json['user_name']]['cautrl'])]
-				if index > 3:
-					index = index - 4
+				#print (index)
+				sendback = ''
+				if nguon == 'dhqt':
+					if index >= dhqt.nrows-1:
+						index = index - dhqt.nrows + 1 
+					#sendback = data[index]
+					pre = 'Có phải bạn muốn hỏi: ' + data[index]
+				elif nguon == 'ctlk':
+					if index >= ctlk.nrows-1:
+						index = index - ctlk.nrows + 1
+					#sendback = data2[index]
+					pre = 'Có phải bạn muốn hỏi: ' + data2[index]	
 				#sessionu = {username : data[index]}
-				pre = 'Có phải bạn muốn hỏi: ' + data[index]
+				#pre = 'Có phải bạn muốn hỏi: ' + sendback
 				serpre = Messages(message=pre,name="server" + json['user_name'])
 				#guive[json['user_name']]['cautrl'] = guive[json['user_name']]['cautrl'] - 1
-			elif guive[json['user_name']]['cautrl'] == 0:
-				guive[json['user_name']]['state'] = 2
-				pre, serpre = initrulebase(json)
+			elif guive[json['user_name']]['cautrl'] == -1:
+				if guive[json['user_name']]['state'] == 3:
+					pre, serpre = resetses(json)
+				else:
+					guive[json['user_name']]['state'] = 2
+					pre, serpre = initrulebase(json)
 			break
 
 			# pre = 'Có vẻ như mình không đoán được câu hỏi rồi, bạn vui lòng trả lời mình vài câu để đoán đúng hơn nha :)\n Bạn muốn hỏi về ĐHQT hay là ISEaSAP (chương trình trao đổi)?'
 			# serpre = Messages(message=pre,name="server" + json['user_name'])
 		if word in keyDongy:
 		#if json['message'] == 'yup':
-			index = guive[json['user_name']]['cau' + str(guive[json['user_name']]['cautrl'])]
-			if index > 3:
-				index = index - 4
-			pre = answer[index]
+			#guive[json['user_name']]['cautrl'] = guive[json['user_name']]['cautrl'] - 1 
+			nguon = guive[json['user_name']]['cau' + str(guive[json['user_name']]['cautrl']+1)]['from']
+			index = guive[json['user_name']]['cau' + str(guive[json['user_name']]['cautrl']+1)]['index']
+			#print (index)
+			if nguon == 'dhqt':
+				if index >= dhqt.nrows-1:
+					index = index - dhqt.nrows + 1 
+				#sendback = data[index]
+				pre = answer[index]
+			elif nguon == 'ctlk':
+				if index >= ctlk.nrows-1:
+					index = index - ctlk.nrows + 1
+				#sendback = data2[index] 
+				pre = answer2[index]
 			serpre = Messages(message=pre,name="server" + json['user_name'] )
 			guive[json['user_name']] = {'state' :0}
 			break
 	return pre, serpre 
+
+def get3answer(json):
+	guive[json['user_name']] = {'cautrl' : 1, 'state' : 1, 'oriques':json['message'] } # setting session data
+	pre = 'Có phải bạn muốn hỏi: ' + predict(json)
+	serpre = Messages(message=pre,name="server" + json['user_name'])
+	return pre, serpre 
+
+def get3answerfromtree(json):
+	guive[json['user_name']]['cautrl'] = 1
+	pre = 'Có phải bạn muốn hỏi: ' + predict(json)
+	serpre = Messages(message=pre,name="server" + json['user_name'])
+	return pre, serpre 
+
+
+
+
+#RULED-BASE BOT
+
+def guessQues(json):
+	mess = ''
+	for i in rulekeywords[json['user_name']]['keyarray']:
+		mess = mess + i
+	ujson = {'user_name': json['user_name'], 'message': mess}
+	pre, serpre = get3answerfromtree(ujson)
+	del ujson
+	guive[json['user_name']]['sheet'] = rulekeywords[json['user_name']]['sheet']
+	del rulekeywords[json['user_name']]
+	return pre, serpre
+
+
+def initrulebase(json):
+	rulekeywords[json['user_name']] = {'state': 0, 'keyarray': []}
+	oriques = guive[json['user_name']]['oriques'].lower()
+	oriques = word_tokenize(oriques)
+	print (oriques)
+	pre = 'Có vẻ như mình không đoán được câu hỏi rồi, bạn vui lòng trả lời mình vài câu để đoán đúng hơn nha :) <br> Bạn muốn hỏi về ĐHQT hay là ISEaSAP (chương trình trao đổi)?'
+	serpre = Messages(message=pre,name="server" + json['user_name'])
+	#oriques = word_tokenize('fuck you bith')
+	for word in oriques:
+		if word in keywords:
+			rulekeywords[json['user_name']]['keyarray'].append(word)
+			if word == 'đhqt':
+				rulekeywords[json['user_name']]['sheet'] = "đhqt"
+				rulekeywords[json['user_name']]['state'] = 0.1
+				for word in oriques:
+					if word in keywords["đhqt"]:
+						rulekeywords[json['user_name']]['keyarray'].append(word)
+						rulekeywords[json['user_name']]['state'] = 1.1
+						nextkey = word
+						if len(keywords["đhqt"][nextkey]) != 1:
+							for word in oriques:
+								if word in keywords["đhqt"][nextkey]:
+									rulekeywords[json['user_name']]['keyarray'].append(word)
+									rulekeywords[json['user_name']]['state'] = 2.1
+									break
+						break
+				pre, serpre = handletree(json)
+			elif word == 'iseasap':
+				rulekeywords[json['user_name']]['sheet'] = "ctlk"
+				rulekeywords[json['user_name']]['state'] = 1.2
+				for word in oriques:
+					if word in keywords["iseasap"]:
+						rulekeywords[json['user_name']]['keyarray'].append(word)
+						rulekeywords[json['user_name']]['state'] = 1.2
+						rulekeywords[json['user_name']]['nextword'] = word
+						nextkey = word
+						if len(keywords["iseasap"][nextkey]) != 1:
+							for word in oriques:
+								if word in keywords["iseasap"][nextkey]:
+									rulekeywords[json['user_name']]['keyarray'].append(word)
+									rulekeywords[json['user_name']]['state'] = 2.2
+									break
+						break
+				pre, serpre = handletree(json)
+			break
+	return pre, serpre 
+
+
+def handletree(json):
+	oriques = guive[json['user_name']]['oriques'].lower()
+	oriques = word_tokenize(oriques)
+	json['message'] = json['message'].lower()
+	if rulekeywords[json['user_name']]['state'] == 0:
+		rulekeywords[json['user_name']]['keyarray'].append(json['message'])
+		if json['message'] == 'đhqt':
+			rulekeywords[json['user_name']]['sheet'] = "đhqt"
+			rulekeywords[json['user_name']]['state'] = 0.1
+			for word in oriques:
+				if word in keywords["đhqt"]:
+					json['message'] = word
+					rulekeywords[json['user_name']]['state'] = 1.1
+					rulekeywords[json['user_name']]['laststate'] = 0
+					nextkey = word
+					break
+
+		elif json['message'] == 'iseasap':
+			rulekeywords[json['user_name']]['sheet'] = "ctlk"
+			rulekeywords[json['user_name']]['state'] = 0.2
+			for word in oriques:
+				if word in keywords["iseasap"]:
+					json['message'] = word
+					rulekeywords[json['user_name']]['state'] = 1.2
+					rulekeywords[json['user_name']]['laststate'] = 0
+					nextkey = word
+					break
+
+#--------------BEGIN OF SECOND LAYER----------
+
+	if rulekeywords[json['user_name']]['state'] == 0.1:
+		rulekeywords[json['user_name']]['state'] = 1.1
+		sendbackmess = 'Bạn muốn biết mục nào của ĐHQT?'
+		for key, value in keywords["đhqt"].items():
+			sendbackmess = sendbackmess + "<br>-" + key
+		pre = sendbackmess
+		serpre = Messages(message=pre,name="server" + json['user_name'])
+
+	if rulekeywords[json['user_name']]['state'] == 0.2:
+		rulekeywords[json['user_name']]['state'] = 1.2
+		rulekeywords[json['user_name']]['laststate'] = 0.2
+		sendbackmess = 'Bạn muốn biết mục nào của chương trình trao đổi?'
+		for key, value in keywords["iseasap"].items():
+			sendbackmess = sendbackmess + "<br>-" + key
+		pre = sendbackmess
+		serpre = Messages(message=pre,name="server" + json['user_name'])
+
+#--------------BEGIN OF THIRD LAYER----------
+
+#--------------FOR ĐHQT----------
+
+	elif rulekeywords[json['user_name']]['state'] == 1.1:
+		rulekeywords[json['user_name']]['keyarray'].append(json['message'])
+		nextkey = json['message']
+		rulekeywords[json['user_name']]['state'] = 2.1
+
+		if len(keywords["đhqt"][nextkey]) != 1:
+			for word in oriques:
+				if word in keywords["đhqt"][nextkey]:
+					rulekeywords[json['user_name']]['keyarray'].append(word)
+					rulekeywords[json['user_name']]['state'] = 3.1
+					break
+		if len(keywords["đhqt"][nextkey]) != 1 and rulekeywords[json['user_name']]['state'] != 3.1:
+			sendbackmess = 'Bạn muốn biết về mục nào?'
+			for mess in keywords["đhqt"][nextkey]:
+				sendbackmess = sendbackmess + "<br>-" + mess
+			pre = sendbackmess
+			serpre = Messages(message=pre,name="server" + json['user_name'])
+
+		else:
+			pre, serpre = guessQues(json)
+
+	elif rulekeywords[json['user_name']]['state'] == 3.1:
+		rulekeywords[json['user_name']]['keyarray'].append(json['message'])
+		nextkey = json['message']
+		pre, serpre = guessQues(json)
+
+
+#--------------FOR CTLK----------
+
+	elif rulekeywords[json['user_name']]['state'] == 1.2:
+		rulekeywords[json['user_name']]['keyarray'].append(json['message'])
+		rulekeywords[json['user_name']]['nextkey'] = json['message']
+		nextkey = json['message']
+		rulekeywords[json['user_name']]['state'] = 2.2
+
+		sendbackmess = 'Bạn muốn biết về mục nào của ' + nextkey +'?'
+		for mess in keywords["iseasap"][nextkey]:
+			sendbackmess = sendbackmess + "<br>-" + mess
+		pre = sendbackmess
+		serpre = Messages(message=pre,name="server" + json['user_name'])
+
+		for word in oriques:
+			if word in keywords["iseasap"][nextkey]:
+				rulekeywords[json['user_name']]['keyarray'].append(word)
+				pre, serpre = guessQues(json)
+				break
+
+	elif rulekeywords[json['user_name']]['state'] == 2.2:
+		rulekeywords[json['user_name']]['keyarray'].append(json['message'])
+		pre, serpre = guessQues(json)
+		
+
+	return pre, serpre
+
+
+
 
 
 # @login_manager.user_loader
@@ -402,6 +623,14 @@ def handle3cauhoi(json):
 #         else:
 #             return redirect(url_for('home'))
 #     return render_template('login.html', error=error)
+
+def resetses(json):
+	pre = 'Có vẻ như câu hỏi của bạn không có trong hệ thống của mình rồi. Mình sẽ lâu câu hỏi của bạn vào database để trường biết nha :)'
+	serpre = Messages(message=pre,name="server" + json['user_name'])
+	db.session.add(UnanswerQuestion(sheet = guive[json['user_name']]['sheet'],question=guive[json['user_name']]['oriques'].lower()))
+	guive[json['user_name']] = {'state' :0}
+	return pre, serpre 
+
 
 @app.route('/')
 def index():
@@ -476,10 +705,12 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 		elif preintend(json['message'], json['user_name']) == 'cmt':
 
 			if predictposneg(json['message']) == 'pos':
+				db.session.add(Positive(comment=json['message']))
 				pre = 'Cảm ơn bạn đã góp ý, mình sẽ lưu vào hệ thống để báo cho trường :)'
 				serpre = Messages(message=pre,name="server" + json['user_name'])
 
 			elif predictposneg(json['message']) == 'neg':
+				db.session.add(Negative(comment=json['message']))
 				pre = 'Mình xin lỗi bạn về điều đó, mình sẽ lưu vào hệ thống để báo cho trường :('
 				serpre = Messages(message=pre,name="server" + json['user_name'])
 
@@ -490,6 +721,8 @@ def handle_my_custom_event(json, methods=['GET', 'POST']):
 		pre, serpre = handle3cauhoi(json)
 	elif guive[json['user_name']]['state'] == 2:
 		pre, serpre = handletree(json)
+	elif guive[json['user_name']]['state'] == 3:
+		pre, serpre = handle3cauhoi(json)
 
 	#elif guive[json['user_name']]['state'] == 2:
 

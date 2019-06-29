@@ -1,12 +1,12 @@
 {
-"ĐHQT": {
-	"học phí": "học phí", 
-	"Tuyển sinh": "Tuyển sinh",
-	"Ngôn ngữ": ["NGÔN NGỮ GIẢNG DẠY", "Trình độ ko đủ"]
+"đhqt": {
+	"học phí": ["học phí"], 
+	"tuyển sinh": ["tuyển sinh"],
+	"ngôn ngữ": ["ngôn ngữ giảng dạy", "trình độ"]
 },
 
-"ISEaSAP":{
-	"Vấn đề chung": [
+"iseasap":{
+	"vấn đề chung": [
 		"là gì" ,
 		"lợi ích" ,
 		"những dạng nào" ,
@@ -16,21 +16,20 @@
 		"visa" ,
 		"mẫu thư" 
 	],
-	"Học phí":[
-		"Khi nào đóng" ,
-		"Chi phí ước tính" ,
+	"học phí":[
+		"thời gian đóng",
+		"chi phí ước tính" ,
 		"học bổng"
 	],
-	"Tuyển sinh":[
-		"Quốc gia nào" ,
-		"Thủ tục" ,
-		"Số tín chỉ" ,
+	"tuyển sinh":[
+		"quốc gia nào" ,
+		"thủ tục" ,
+		"số tín chỉ" ,
 		"môn học" ,
 		"thủ tục" ,
 		"tiếng anh" ,
 		"thời gian" ,
-		"dang sách môn" ,
-		"mẫu thư"
+		"dang sách môn"
 	]
 }
 }
