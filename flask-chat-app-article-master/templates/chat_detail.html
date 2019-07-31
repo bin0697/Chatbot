@@ -39,9 +39,8 @@
               <div class="chat_people">
                 <div class="chat_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div>
                 <div class="chat_ib">
-                  <h5>Sunil Rajput <span class="chat_date">Dec 25</span></h5>
-                  <p>Test, which is a new approach to have all solutions 
-                    astrology under one roof.</p>
+                  <h5>IU chatbot<span class="chat_date">Dec 25</span></h5>
+                  <p>{{ messages[-1].message.replace('\n', '<br>')[0:50] + '...' }}</p>
                 </div>
               </div>
             </div>
@@ -136,6 +135,11 @@
               {%endfor%}
               <!-- </ul> -->
           </div>
+          <script>
+          var wtf = $('#scroll');
+          var height = wtf[0].scrollHeight;
+          wtf.scrollTop(height);
+          </script>
         
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
@@ -166,7 +170,7 @@
 
         if( typeof msg.user_name !== 'undefined' ) {
           if (msg.user_name == 'server' + '{{name}}'){
-            console.log('server abc')
+          
             $( 'div.msg_history' ).append( '<div class="incoming_msg"><div class="incoming_msg_img"> <img src="https://ptetutorials.com/images/user-profile.png" alt="sunil"> </div><div class="received_msg"><div class="received_withd_msg"><p>'+msg.message+'</p></div></div></div></div>' )
             var wtf = $('#scroll');
             var height = wtf[0].scrollHeight;
@@ -174,7 +178,7 @@
           }
           else{
             $( 'div.msg_history' ).append( '<div class="outgoing_msg"><div class="sent_msg"><p>'+msg.message+'</p></div></div>' )
-             var wtf = $('#scroll');
+            var wtf = $('#scroll');
             var height = wtf[0].scrollHeight;
             wtf.scrollTop(height);
           }
